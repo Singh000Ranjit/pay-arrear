@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSPCL Due vs Drawn Pay Arrears Calculator (Rounded)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3, h4 {
+            color: #0056b3;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #17a2b8;
+            border-bottom-style: dashed;
+        }
+        h4 {
+            font-size: 1.1em;
+            border-bottom-style: dotted;
+            padding-bottom: 5px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 30px; /* row-gap column-gap */
+        }
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .revised-scale-box {
+            background-color: #e7f5ff; /* Light Blue */
+            border: 3px solid #0056b3;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .old-scale-box {
+            background-color: #e8f5e9; /* Light Green */
+            border: 3px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .revised-scale-box h3, .old-scale-box h3 {
+            border-bottom-style: solid;
+            border-bottom-width: 2px;
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        .revised-scale-box h3 {
+            color: #0056b3;
+            border-bottom-color: #bde0fe;
+        }
+        .old-scale-box h3 {
+            color: #1c7430;
+            border-bottom-color: #a9d6ab;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input:disabled, select:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        button.danger {
+            background-color: #dc3545;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        #resultsContainer {
+            margin-top: 30px;
+            display: none;
+        }
+        #resultsTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        #resultsTable th, #resultsTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        #resultsTable th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        #resultsTable .group-header { background-color: #0056b3; }
+        #resultsTable .due-header { background-color: #17a2b8; }
+        #resultsTable .drawn-header { background-color: #28a745; }
+        #resultsTable .diff-header { background-color: #ffc107; color: #333;}
+        #resultsTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        #resultsTable td:first-child, #resultsTable td:last-child {
+             text-align: left;
+        }
+        #employeeDetailsOutput {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .special-effect-entry {
+            border: 1px dashed #ccc;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            position: relative;
+            background-color: #fafafa;
+        }
+        .special-effect-entry .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .print-only {
+            display: none;
+        }
+
+        #instalmentSummaryContainer {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .instalment-part {
+            margin-bottom: 25px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .summary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 0.95em;
+        }
+        .summary-table td:first-child {
+            width: 65%;
+            font-weight: normal;
+        }
+        .summary-table td:last-child {
+            text-align: right;
+            font-weight: bold;
+        }
+        .summary-table .net-payable-row td {
+            background-color: #d4edda; /* Light green for emphasis */
+        }
+        #instalmentSummaryContainer h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        #instalmentSummaryContainer h3 {
+            color: #0056b3;
+            background-color: #e7f5ff;
+            padding: 8px;
+            border-radius: 4px;
+            border-bottom: 2px solid #0056b3;
+        }
+        #instalmentSummaryContainer h4 {
+            color: #1c7430;
+            margin-top: 15px;
+            padding-bottom: 3px;
+            border-bottom: 1px dashed #28a745;
+        }
+
+        @media print {
+            @page {
+                margin-top: 50px; /* Reserve space for header on EVERY page */
+                margin-bottom: 25px;
+            }
+            body {
+                max-width: 100%;
+                margin: 0;
+                padding: 0; /* padding-top removed from here */
+                background-color: #fff;
+                font-size: 8pt;
+            }
+            #print-page-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 40px;
+                padding: 0 20px;
+                background: #fff;
+                border-bottom: 1px solid #666;
+                font-weight: bold;
+                z-index: 1000;
+            }
+            .container {
+                 box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+            #resultsContainer {
+                display: block !important;
+                box-shadow: none;
+                border: none;
+                margin-top: 0;
+            }
+            #resultsTable th, #resultsTable td, .summary-table td {
+                font-size: 7pt;
+                padding: 4px;
+            }
+            #resultsTable th {
+                position: static; /* This is the fix for the missing headers */
+                -webkit-print-color-adjust: exact; /* Ensures background colors print */
+                print-color-adjust: exact;
+            }
+            #instalmentSummaryContainer {
+                padding: 10px 0;
+                border: none;
+                background-color: #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="print-page-header" class="print-only"></div>
+
+    <div class="container">
+        <div class="no-print">
+            <h1>PSPCL Due vs Drawn Pay Arrears Calculator (01.01.2016 - 30.06.2021)</h1>
+            <p>by Er. Ranjit Singh ASE 9501381364</p>
+            <p>Enter the employee details to calculate the month-wise pay details for both revised (due) and old (drawn) scales, and the difference thereof.</p>
+            
+            <form id="payForm">
+                <!-- Employee details will take up the top row of the grid -->
+                <div class="form-group">
+                    <label for="empName">Employee Name</label>
+                    <input type="text" id="empName" required>
+                </div>
+                <div class="form-group">
+                    <label for="empCode">Employee Code</label>
+                    <input type="text" id="empCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="empPost">Present post (Designation)</label>
+                    <input type="text" id="empPost" required>
+                </div>
+                <div class="form-group">
+                    <label>Falls under NPS?</label>
+                    <div>
+                        <input type="radio" name="npsStatus" id="npsYes" value="yes" checked> <label for="npsYes" style="font-weight:normal;">Yes</label>
+                        &nbsp;&nbsp;
+                        <input type="radio" name="npsStatus" id="npsNo" value="no"> <label for="npsNo" style="font-weight:normal;">No</label>
+                    </div>
+                </div>
+
+                <!-- NEW SECTION FOR REGULAR SCALE DATE -->
+                <div class="full-width">
+                    <label>Is the date of regular scale after 01.01.2016?</label>
+                    <div>
+                        <input type="radio" name="isRegularScaleAfter" id="regularScaleNo" value="no" checked>
+                        <label for="regularScaleNo" style="font-weight:normal;">No</label>
+                        &nbsp;&nbsp;
+                        <input type="radio" name="isRegularScaleAfter" id="regularScaleYes" value="yes">
+                        <label for="regularScaleYes" style="font-weight:normal;">Yes</label>
+                    </div>
+                    <div id="regularScaleDateContainer" style="display: none; margin-top: 10px;">
+                        <label for="regularScaleDate">Date of Regular Scale</label>
+                        <input type="date" id="regularScaleDate">
+                    </div>
+                </div>
+
+                <!-- NEW SECTION FOR EOL -->
+                <div class="full-width">
+                    <label>Any Extra Ordinary Leave (EOL) period(s) without pay?</label>
+                    <div>
+                        <input type="radio" name="hasEol" id="eolNo" value="no" checked>
+                        <label for="eolNo" style="font-weight:normal;">No</label>
+                        &nbsp;&nbsp;
+                        <input type="radio" name="hasEol" id="eolYes" value="yes">
+                        <label for="eolYes" style="font-weight:normal;">Yes</label>
+                    </div>
+                    <div id="eolPeriodsContainer" style="display: none; margin-top: 10px;">
+                        <!-- Dynamic EOL entries will go here -->
+                    </div>
+                    <button type="button" id="addEolBtn" class="secondary" style="display: none; margin-top: 10px; max-width: 200px;">Add EOL Period</button>
+                </div>
+
+                <div class="full-width">
+                    <label for="incrementMonth" style="margin-top:10px;">Month of Annual Increment as on <span id="incrementDateLabel">01.01.2016</span></label>
+                    <select id="incrementMonth" required>
+                        <option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7" selected>July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                    </select>
+                </div>
+                
+                <!-- LEFT COLUMN: REVISED (DUE) DETAILS -->
+                <div class="form-column revised-scale-box">
+                    <div>
+                        <h3>Revised (Due) Pay Scale Details</h3>
+                        <div class="form-group">
+                            <label for="initialPay">Revised Basic Pay (as on <span id="revisedScaleDateLabel">01.01.2016</span>)</label>
+                            <input type="number" id="initialPay" placeholder="e.g., 49000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="initialLevel">Pay Level</label>
+                            <input type="text" id="initialLevel" placeholder="e.g., 15 or 18A" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="initialCell">Cell Number</label>
+                            <input type="number" id="initialCell" placeholder="e.g., 2" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Special Effects (Revised Scale)</h3>
+                        <div id="specialEffectsContainer"></div>
+                        <button type="button" id="addEffectBtn" class="secondary" style="margin-top: 10px;">Add Revised Scale Effect</button>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: OLD (DRAWN) DETAILS -->
+                <div class="form-column old-scale-box">
+                    <div>
+                        <h3>Old (Drawn) Pay Scale Details</h3>
+                        <div class="form-group">
+                            <label for="oldInitialPay">Initial Pay (Old Scale as on <span id="oldScaleDateLabel">01.01.2016</span>)</label>
+                            <input type="number" id="oldInitialPay" placeholder="e.g., 18030" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="oldGradePay">Grade Pay (Old Scale)</label>
+                            <input type="number" id="oldGradePay" placeholder="e.g., 5400" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Special Effects (Old Scale)</h3>
+                        <p style="font-size: 0.9em; color: #555;">(These entries are automatically added and synced from the Revised Scale effects)</p>
+                        <div id="oldSpecialEffectsContainer"></div>
+                    </div>
+                </div>
+
+                <div class="button-group full-width">
+                    <button type="submit">Calculate</button>
+                    <button type="reset" class="secondary">Reset Form</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="resultsContainer">
+             <h2>Calculation Results</h2>
+             <div id="employeeDetailsOutput"></div>
+             <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Month-Year</th>
+                        <th colspan="6" class="group-header">Due Pay Details (Revised Scale)</th>
+                        <th colspan="5" class="group-header">Drawn Pay Details (Old Scale)</th>
+                        <th colspan="3" class="group-header">Difference (Due - Drawn)</th>
+                        <th rowspan="2">Remarks</th>
+                    </tr>
+                    <tr>
+                        <th class="due-header">Level</th>
+                        <th class="due-header">Cell</th>
+                        <th class="due-header">Basic Pay</th>
+                        <th class="due-header">DA %</th>
+                        <th class="due-header">DA Amount</th>
+                        <th class="due-header">Total</th>
+                        <th class="drawn-header">Basic Pay</th>
+                        <th class="drawn-header">Interim Relief</th>
+                        <th class="drawn-header">DA %</th>
+                        <th class="drawn-header">DA Amount</th>
+                        <th class="drawn-header">Total</th>
+                        <th class="diff-header">Basic Pay</th>
+                        <th class="diff-header">DA</th>
+                        <th class="diff-header">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTbody"></tbody>
+            </table>
+             <div id="instalmentSummaryContainer" style="margin-top: 30px;">
+                <!-- Instalment summary will be injected here by JavaScript -->
+            </div>
+            <div class="button-group no-print">
+                <button onclick="window.print()">Print Results</button>
+                <button id="csvBtn">Download as CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATES (HIDDEN) -->
+    <div id="specialEffectTemplate" style="display: none;">
+        <div class="special-effect-entry">
+            <button type="button" class="remove-btn danger" onclick="removeEffectPair(this)">Remove</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group"><label>Type of Effect</label>
+                    <select class="effectType" required>
+                        <option value="Promotion">Promotion</option>
+                        <option value="TBPS">TBPS</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Date of Effect</label><input type="date" class="effectDate" required></div>
+                <div class="form-group"><label>New Basic Pay</label><input type="number" class="effectPay" required></div>
+                <div class="form-group"><label>New Level</label><input type="text" class="effectLevel" required></div>
+                <div class="form-group"><label>New Cell</label><input type="number" class="effectCell" required></div>
+                <div class="form-group increment-change-container"><label>Change Date of Annual Increment?</label>
+                    <div><input type="radio" name="changeIncrement" value="yes" checked> Yes <input type="radio" name="changeIncrement" value="no"> No</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="oldSpecialEffectTemplate" style="display: none;">
+        <div class="special-effect-entry">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                 <div class="form-group"><label>Type of Effect</label>
+                    <select class="oldEffectType" required disabled>
+                        <option value="Promotion">Promotion</option>
+                        <option value="TBPS">TBPS</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Date of Effect</label><input type="date" class="oldEffectDate" required disabled></div>
+                <div class="form-group"><label>New Initial Pay (Old)</label><input type="number" class="oldEffectPay" required></div>
+                <div class="form-group"><label>New Grade Pay (Old)</label><input type="number" class="oldEffectGradePay" required></div>
+                <div class="form-group full-width increment-change-container"><label>Change Date of Annual Increment?</label>
+                    <div><input type="radio" name="changeOldIncrement" value="yes" checked disabled> Yes <input type="radio" name="changeOldIncrement" value="no" disabled> No</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EOL Period Template (HIDDEN) -->
+    <div id="eolPeriodTemplate" style="display: none;">
+        <div class="special-effect-entry eol-entry">
+            <button type="button" class="remove-btn danger" onclick="this.parentElement.remove()">Remove</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group"><label>EOL From Date</label><input type="date" class="eolFromDate" required></div>
+                <div class="form-group"><label>EOL To Date</label><input type="date" class="eolToDate" required></div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+// --- DATA STORES ---
+
+const payMatrix = {
+    '1': [18000, 18500, 19100, 19700, 20300, 20900, 21500, 22100, 22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900],
+    '2': [19600, 20200, 20800, 21400, 22000, 22700, 23400, 24100, 24800, 25500, 26300, 27100, 27900, 28700, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300, 62100],
+    '3': [22700, 23400, 24100, 24800, 25500, 26300, 27100, 27900, 28700, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300, 62100, 64000, 65900, 67900, 69900, 72000],
+    '4': [23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300],
+    '5': [24000, 24700, 25400, 26200, 27000, 27800, 28600, 29500, 30400, 31300, 32200, 33200, 34200, 35200, 36300, 37400, 38500, 39700, 40900, 42100, 43400, 44700, 46000, 47400, 48800, 50300, 51800, 53400, 55000, 56700, 58400, 60200, 62000, 63900, 65800, 67800, 69800, 71900, 74100, 76300],
+    '6': [25500, 26300, 27100, 27900, 28700, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300, 62100, 64000, 65900, 67900, 69900, 72000, 74200, 76400, 78700, 81100],
+    '7': [28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400, 63200, 65100, 67100, 69100, 71200, 73300, 75500, 77800, 80100, 82500, 85000, 87600, 90200],
+    '8': [31000, 31900, 32900, 33900, 34900, 35900, 37000, 38100, 39200, 40400, 41600, 42800, 44100, 45400, 46800, 48200, 49600, 51100, 52600, 54200, 55800, 57500, 59200, 61000, 62800, 64700, 66600, 68600, 70700, 72800, 75000, 77300, 79600, 82000, 84500, 87000, 89600, 92300, 95100, 98000],
+    '9': [33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400, 63200, 65100, 67100, 69100, 71200, 73300, 75500, 77800, 80100, 82500, 85000, 87600, 90200, 92900, 95700, 98600, 101600, 104600],
+    '10': [38500, 39700, 40900, 42100, 43400, 44700, 46000, 47400, 48800, 50300, 51800, 53400, 55000, 56700, 58400, 60200, 62000, 63900, 65800, 67800, 69800, 71900, 74100, 76300, 78600, 81000, 83400, 85900, 88500, 91200, 93900, 96700, 99600, 102600, 105700, 108900, 112200, 115600, 119100, 122700],
+    '11': [41500, 42700, 44000, 45300, 46700, 48100, 49500, 51000, 52500, 54100, 55700, 57400, 59100, 60900, 62700, 64600, 66500, 68500, 70600, 72700, 74900, 77100, 79400, 81800, 84300, 86800, 89400, 92100, 94900, 97700, 100600, 103600, 106700, 109900, 113200, 116600, 120100, 123700, 127400, 131200],
+    '12': [43700, 45000, 46400, 47800, 49200, 50700, 52200, 53800, 55400, 57100, 58800, 60600, 62400, 64300, 66200, 68200, 70200, 72300, 74500, 76700, 79000, 81400, 83800, 86300, 88900, 91600, 94300, 97100, 100000, 103000, 106100, 109300, 112600, 116000, 119500, 123100, 126800, 130600, 134500, 138500],
+    '13': [43800, 45100, 46500, 47900, 49300, 50800, 52300, 53900, 55500, 57200, 58900, 60700, 62500, 64400, 66300, 68300, 70300, 72400, 74600, 76800, 79100, 81500, 83900, 86400, 89000, 91700, 94500, 97300, 100200, 103200, 106300, 109500, 112800, 116200, 119700, 123300, 127000, 130800, 134700, 138700],
+    '14': [45600, 47000, 48400, 49900, 51400, 52900, 54500, 56100, 57800, 59500, 61300, 63100, 65000, 67000, 69000, 71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400, 120900, 124500, 128200, 132000, 136000, 140100, 144300],
+    '15': [47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400, 115800, 119300, 122900, 126600, 130400, 134300, 138300, 142400, 146700, 151100],
+    '16': [50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600, 65500, 67500, 69500, 71600, 73700, 75900, 78200, 80500, 82900, 85400, 88000, 90600, 93300, 96100, 99000, 102000, 105100, 108300, 111500, 114800, 118200, 121700, 125400, 129200, 133100, 137100, 141200, 145400, 149800, 154300, 158900],
+    '17': [52600, 54200, 55800, 57500, 59200, 61000, 62800, 64700, 66600, 68600, 70700, 72800, 75000, 77300, 79600, 82000, 84500, 87000, 89600, 92300, 95100, 98000, 100900, 103900, 107000, 110200, 113500, 116900, 120400, 124000, 127700, 131500, 135400, 139500, 143700, 148000, 152400, 157000, 161700, 166600],
+    '18': [59900, 61700, 63600, 65500, 67500, 69500, 71600, 73700, 75900, 78200, 80500, 82900, 85400, 88000, 90600, 93300, 96100, 99000, 102000, 105100, 108300, 111500, 114800, 118200, 121700, 125400, 129200, 133100, 137100, 141200, 145400, 149800, 154300, 158900, 163700, 168600, 173700, 178900, 184300, 189800],
+    '19': [71400, 73500, 75700, 78000, 80300, 82700, 85200, 87800, 90400, 93100, 95900, 98800, 101800, 104900, 108000, 111200, 114500, 117900, 121400, 125000, 128800, 132700, 136700, 140800, 145000, 149400, 153900, 158500, 163300, 168200, 173200, 178400, 183800, 189300, 195000, 200900, 206900],
+    '20': [88800, 91500, 94200, 97000, 99900, 102900, 106000, 109200, 112500, 115900, 119400, 123000, 126700, 130500, 134400, 138400, 142600, 146900, 151300, 155800, 160500, 165300, 170300, 175400, 180700, 186100, 191700, 197500, 203400, 209500],
+    '21': [135900, 140000, 144200, 148500, 153000, 157600, 162300, 167200, 172200, 177400, 182700, 188200, 193800, 199600, 205600, 211800, 218200],
+    '22': [151300, 155800, 160500, 165300, 170300, 175400, 180700, 186100, 191700, 197500, 203400, 209500, 215800, 222300],
+    '23': [182200, 187700, 193300, 199100, 205100, 211300, 217600, 224100],
+    '18A': [56100, 57800, 59500, 61300, 63100, 65000, 67000, 69000, 71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400, 120900, 124500, 128200, 132000, 136000, 140100, 144300, 148600, 153100, 157700, 162400, 167300, 172300, 177500],
+    '19A': [67300, 69300, 71400, 73500, 75700, 78000, 80300, 82700, 85200, 87800, 90400, 93100, 95900, 98800, 101800, 104900, 108000, 111200, 114500, 117900, 121400, 125000, 128800, 132700, 136700, 140800, 145000, 149400, 153900, 158500, 163300, 168200, 173200, 178400, 183800, 189300, 195000, 200900],
+    '20A': [80400, 82800, 85300, 87900, 90500, 93200, 96000, 98900, 101900, 105000, 108200, 111400, 114700, 118100, 121600, 125200, 129000, 132900, 136900, 141000, 145200, 149600, 154100, 158700, 163500, 168400, 173500, 178700, 184100, 189600, 195300, 201200],
+    '21A': [122800, 126500, 130300, 134200, 138200, 142300, 146600, 151000, 155500, 160200, 165000, 170000, 175100, 180400, 185800, 191400, 197100, 203000, 209100]
+};
+
+const revisedDaRates = [
+    { effectiveDate: new Date('2019-06-01'), rate: 0.17 }, { effectiveDate: new Date('2018-12-01'), rate: 0.12 }, { effectiveDate: new Date('2018-06-01'), rate: 0.09 }, { effectiveDate: new Date('2017-12-01'), rate: 0.07 }, { effectiveDate: new Date('2017-06-01'), rate: 0.05 }, { effectiveDate: new Date('2016-12-01'), rate: 0.04 }, { effectiveDate: new Date('2016-06-01'), rate: 0.02 }, { effectiveDate: new Date('2016-01-01'), rate: 0.00 }
+];
+
+const oldDaRates = [
+    { effectiveDate: new Date('2020-02-01'), rate: 1.48 }, { effectiveDate: new Date('2019-10-01'), rate: 1.42 }, { effectiveDate: new Date('2019-06-01'), rate: 1.39 }, { effectiveDate: new Date('2019-01-01'), rate: 1.39 }, { effectiveDate: new Date('2018-07-01'), rate: 1.32 }, { effectiveDate: new Date('2018-01-01'), rate: 1.32 }, { effectiveDate: new Date('2017-07-01'), rate: 1.32 }, { effectiveDate: new Date('2016-12-01'), rate: 1.32 }, { effectiveDate: new Date('2016-10-01'), rate: 1.25 }, { effectiveDate: new Date('2015-12-01'), rate: 1.19 }
+];
+
+let effectCounter = 0;
+
+// --- UI INTERACTIVITY ---
+document.addEventListener('DOMContentLoaded', () => {
+
+    const regularScaleRadios = document.querySelectorAll('input[name="isRegularScaleAfter"]');
+    const regularScaleDateContainer = document.getElementById('regularScaleDateContainer');
+    const regularScaleDateInput = document.getElementById('regularScaleDate');
+    const revisedScaleDateLabel = document.getElementById('revisedScaleDateLabel');
+    const oldScaleDateLabel = document.getElementById('oldScaleDateLabel');
+    const incrementDateLabel = document.getElementById('incrementDateLabel');
+
+    function updateDateLabels() {
+        const isYes = document.getElementById('regularScaleYes').checked;
+        const dateValue = regularScaleDateInput.value;
+        let displayDateStr = '01.01.2016';
+
+        if (isYes && dateValue) {
+            const [year, month, day] = dateValue.split('-');
+            displayDateStr = `${day}.${month}.${year}`;
+        }
+        
+        revisedScaleDateLabel.textContent = displayDateStr;
+        oldScaleDateLabel.textContent = displayDateStr;
+        incrementDateLabel.textContent = displayDateStr;
+    }
+
+    regularScaleRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'yes') {
+                regularScaleDateContainer.style.display = 'block';
+                regularScaleDateInput.required = true;
+            } else {
+                regularScaleDateContainer.style.display = 'none';
+                regularScaleDateInput.value = '';
+                regularScaleDateInput.required = false;
+            }
+            updateDateLabels();
+        });
+    });
+    regularScaleDateInput.addEventListener('change', updateDateLabels);
+    
+    // EOL UI Logic
+    const eolRadios = document.querySelectorAll('input[name="hasEol"]');
+    const eolContainer = document.getElementById('eolPeriodsContainer');
+    const addEolBtn = document.getElementById('addEolBtn');
+    const eolTemplate = document.getElementById('eolPeriodTemplate');
+
+    eolRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'yes') {
+                eolContainer.style.display = 'block';
+                addEolBtn.style.display = 'inline-block';
+            } else {
+                eolContainer.style.display = 'none';
+                addEolBtn.style.display = 'none';
+                eolContainer.innerHTML = ''; // Clear entries on 'No'
+            }
+        });
+    });
+
+    addEolBtn.addEventListener('click', () => {
+        const clone = eolTemplate.firstElementChild.cloneNode(true);
+        eolContainer.appendChild(clone);
+    });
+});
+
+
+// --- HELPER FUNCTIONS ---
+function getDaRateForDate(date, rates) {
+    for (const da of rates) {
+        if (date >= da.effectiveDate) {
+            return da.rate;
+        }
+    }
+    return 0.00; // Default
+}
+
+function formatCurrency(num) {
+    // AMENDED: Always format as integer
+    const options = { 
+        style: 'decimal', 
+        minimumFractionDigits: 0, 
+        maximumFractionDigits: 0 
+    };
+    return new Intl.NumberFormat('en-IN', options).format(Math.round(num));
+}
+
+
+function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+}
+
+function removeEffectPair(buttonElement) {
+    const revEntry = buttonElement.closest('.special-effect-entry');
+    if (!revEntry || !revEntry.dataset.effectId) return;
+    
+    const effectId = revEntry.dataset.effectId;
+    const oldEntry = document.querySelector(`#oldSpecialEffectsContainer .special-effect-entry[data-effect-id="${effectId}"]`);
+    
+    revEntry.remove();
+    if (oldEntry) {
+        oldEntry.remove();
+    }
+}
+
+// --- EVENT LISTENERS ---
+document.getElementById('addEffectBtn').addEventListener('click', () => {
+    effectCounter++;
+    const effectId = effectCounter;
+
+    const revTemplate = document.getElementById('specialEffectTemplate');
+    const revClone = revTemplate.cloneNode(true);
+    revClone.removeAttribute('id');
+    revClone.style.display = 'block';
+    
+    const revEntry = revClone.firstElementChild;
+    revEntry.dataset.effectId = effectId;
+
+    revEntry.querySelectorAll('input[name="changeIncrement"]').forEach(rb => rb.name = 'changeIncrement' + effectId);
+    
+    document.getElementById('specialEffectsContainer').appendChild(revEntry);
+
+    const oldTemplate = document.getElementById('oldSpecialEffectTemplate');
+    const oldClone = oldTemplate.cloneNode(true);
+    oldClone.removeAttribute('id');
+    oldClone.style.display = 'block';
+
+    const oldEntry = oldClone.firstElementChild;
+    oldEntry.dataset.effectId = effectId;
+    
+    oldEntry.querySelectorAll('input[name="changeOldIncrement"]').forEach(rb => rb.name = 'changeOldIncrement' + effectId);
+
+    document.getElementById('oldSpecialEffectsContainer').appendChild(oldEntry);
+});
+
+document.getElementById('specialEffectsContainer').addEventListener('change', function(e) {
+    const target = e.target;
+    const revEntry = target.closest('.special-effect-entry');
+    if (!revEntry || !revEntry.dataset.effectId) return;
+
+    const effectId = revEntry.dataset.effectId;
+    const oldEntry = document.querySelector(`#oldSpecialEffectsContainer .special-effect-entry[data-effect-id="${effectId}"]`);
+    if (!oldEntry) return;
+
+    if (target.classList.contains('effectType')) {
+        oldEntry.querySelector('.oldEffectType').value = target.value;
+        const incrementContainer = revEntry.querySelector('.increment-change-container');
+        const oldIncrementContainer = oldEntry.querySelector('.increment-change-container');
+        const displayStyle = target.value === 'TBPS' ? 'none' : 'flex';
+        if (incrementContainer) incrementContainer.style.display = displayStyle;
+        if (oldIncrementContainer) oldIncrementContainer.style.display = displayStyle;
+
+    } else if (target.classList.contains('effectDate')) {
+        oldEntry.querySelector('.oldEffectDate').value = target.value;
+    } else if (target.type === 'radio' && target.name.startsWith('changeIncrement')) {
+        if (target.checked) {
+            oldEntry.querySelector(`input[name^="changeOldIncrement"][value="${target.value}"]`).checked = true;
+        }
+    }
+});
+
+
+document.getElementById('payForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    calculateAndDisplay();
+});
+
+document.getElementById('csvBtn').addEventListener('click', () => {
+    generateAndDownloadCsv();
+});
+
+// --- MAIN CALCULATION LOGIC ---
+function calculateAndDisplay() {
+    // 1. GET USER INPUTS
+    const empName = document.getElementById('empName').value;
+    const empCode = document.getElementById('empCode').value;
+    const empPost = document.getElementById('empPost').value;
+    const npsStatus = document.querySelector('input[name="npsStatus"]:checked').value;
+    let incrementMonth = parseInt(document.getElementById('incrementMonth').value);
+
+    // Revised Scale Inputs
+    let revPay = parseInt(document.getElementById('initialPay').value);
+    let revLevel = document.getElementById('initialLevel').value.toUpperCase();
+    let revCellIndex = parseInt(document.getElementById('initialCell').value) - 1;
+
+    // Old Scale Inputs
+    let oldInitialPay = parseInt(document.getElementById('oldInitialPay').value);
+    let oldGradePay = parseInt(document.getElementById('oldGradePay').value);
+    
+    if (!payMatrix[revLevel] || payMatrix[revLevel][revCellIndex] !== revPay) {
+        alert('Error: The initial Revised Basic Pay does not match the value for the specified Level and Cell. Please check the pay matrix and try again.');
+        return;
+    }
+
+    // Get EOL periods
+    const eolPeriods = [];
+    if (document.getElementById('eolYes').checked) {
+        const eolEntries = document.querySelectorAll('#eolPeriodsContainer .eol-entry');
+        for (const entry of eolEntries) {
+            const fromDateStr = entry.querySelector('.eolFromDate').value;
+            const toDateStr = entry.querySelector('.eolToDate').value;
+            if (fromDateStr && toDateStr) {
+                const start = new Date(fromDateStr + 'T00:00:00');
+                const end = new Date(toDateStr + 'T00:00:00');
+                if (start > end) {
+                    alert(`Invalid EOL period: The 'To' date (${toDateStr}) cannot be earlier than the 'From' date (${fromDateStr}). Please correct the dates and try again.`);
+                    return; // Stop the calculation
+                }
+                eolPeriods.push({ start, end });
+            }
+        }
+    }
+
+    // Get special effects (Revised Scale)
+    const specialEffects = [];
+    document.querySelectorAll('#specialEffectsContainer .special-effect-entry').forEach(entry => {
+        const effectDateStr = entry.querySelector('.effectDate').value;
+        if (effectDateStr) {
+            const effectDate = new Date(effectDateStr + 'T00:00:00');
+            const effectType = entry.querySelector('.effectType').value;
+            let changeIncrement = (effectType === 'Promotion') ? (entry.querySelector('input[name^="changeIncrement"]:checked')?.value === 'yes') : false;
+            
+            specialEffects.push({
+                date: effectDate, type: effectType, pay: parseInt(entry.querySelector('.effectPay').value),
+                level: entry.querySelector('.effectLevel').value.toUpperCase(),
+                cellIndex: parseInt(entry.querySelector('.effectCell').value) - 1, changeIncrement
+            });
+        }
+    });
+    specialEffects.sort((a, b) => a.date - b.date);
+
+    // Get special effects (Old Scale)
+    const oldSpecialEffects = [];
+    document.querySelectorAll('#oldSpecialEffectsContainer .special-effect-entry').forEach(entry => {
+        const effectDateStr = entry.querySelector('.oldEffectDate').value;
+        if (effectDateStr) {
+            const effectDate = new Date(effectDateStr + 'T00:00:00');
+            const effectType = entry.querySelector('.oldEffectType').value;
+            let changeIncrement = (effectType === 'Promotion') ? (entry.querySelector('input[name^="changeOldIncrement"]:checked')?.value === 'yes') : false;
+            
+            oldSpecialEffects.push({
+                date: effectDate, type: effectType,
+                pay: parseInt(entry.querySelector('.oldEffectPay').value),
+                gradePay: parseInt(entry.querySelector('.oldEffectGradePay').value), changeIncrement
+            });
+        }
+    });
+    oldSpecialEffects.sort((a, b) => a.date - b.date);
+
+    // 2. CALCULATION LOOP
+    const results = [];
+    const endDate = new Date('2021-06-30T00:00:00');
+    let startDate;
+    const isRegularScaleDelayed = document.getElementById('regularScaleYes').checked;
+    const regularScaleDateValue = document.getElementById('regularScaleDate').value;
+
+    if (isRegularScaleDelayed && regularScaleDateValue) {
+        startDate = new Date(regularScaleDateValue + 'T00:00:00');
+        if (startDate < new Date('2016-01-01T00:00:00') || startDate > endDate) {
+             alert('The Date of Regular Scale must be between 01.01.2016 and 30.06.2021.');
+             return;
+        }
+    } else {
+        startDate = new Date('2016-01-01T00:00:00');
+    }
+    
+    let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    let oldIncrementMonth = incrementMonth;
+    
+    let refDateForIncrement = new Date(startDate);
+    let lastRevIncrementYear = refDateForIncrement.getFullYear();
+    if (refDateForIncrement.getMonth() + 1 < incrementMonth) lastRevIncrementYear--;
+    let lastOldIncrementYear = refDateForIncrement.getFullYear();
+    if (refDateForIncrement.getMonth() + 1 < oldIncrementMonth) lastOldIncrementYear--;
+
+    let currentOldInitialPay = oldInitialPay;
+    let currentOldGradePay = oldGradePay;
+    let isDoubleIncrementDue_rev = false, isDoubleIncrementDue_old = false;
+
+    while (currentDate <= endDate) {
+        let remarks = [];
+        
+        // --- ANNUAL INCREMENT LOGIC ---
+        if (currentDate.getMonth() + 1 === incrementMonth && currentDate.getFullYear() > lastRevIncrementYear) {
+             if (payMatrix[revLevel]) {
+                let incrementsToApply = isDoubleIncrementDue_rev ? 2 : 1;
+                let remarkText = `Rev: Annual Incr.${isDoubleIncrementDue_rev ? ' (x2 post-promo)' : ''}`;
+                isDoubleIncrementDue_rev = false;
+
+                revCellIndex = Math.min(revCellIndex + incrementsToApply, payMatrix[revLevel].length - 1);
+                remarks.push(remarkText + (revCellIndex === payMatrix[revLevel].length - 1 ? ' (Max)' : ''));
+                revPay = payMatrix[revLevel][revCellIndex];
+                lastRevIncrementYear = currentDate.getFullYear();
+             }
+        }
+        if (currentDate.getMonth() + 1 === oldIncrementMonth && currentDate.getFullYear() > lastOldIncrementYear) {
+            if (isDoubleIncrementDue_old) {
+                let p1 = currentOldInitialPay + currentOldGradePay;
+                let p2 = Math.ceil(p1 * 1.03 / 10) * 10;
+                currentOldInitialPay = Math.ceil(p2 * 1.03 / 10) * 10 - currentOldGradePay;
+                remarks.push('Old: Annual Incr. (x2 post-promo)');
+                isDoubleIncrementDue_old = false;
+            } else {
+                currentOldInitialPay = Math.ceil((currentOldInitialPay + currentOldGradePay) * 1.03 / 10) * 10 - currentOldGradePay;
+                remarks.push('Old: Annual Incr.');
+            }
+            lastOldIncrementYear = currentDate.getFullYear();
+        }
+
+        // --- SETUP MONTHLY PAY (can be overridden by proration) ---
+        let monthlyRevPay = revPay;
+        let monthlyDrawnBasicPay = currentOldInitialPay + currentOldGradePay;
+        
+        // --- PRORATION FOR MID-MONTH SPECIAL EFFECTS ---
+        const revEffect = specialEffects.find(e => e.date.getFullYear() === currentDate.getFullYear() && e.date.getMonth() === currentDate.getMonth());
+        if (revEffect) {
+             if (!payMatrix[revEffect.level] || payMatrix[revEffect.level][revEffect.cellIndex] !== revEffect.pay) {
+                alert(`Error: Revised pay for special effect on ${revEffect.date.toLocaleDateString()} does not match Level/Cell.`); return;
+            }
+            const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
+            const effectDay = revEffect.date.getDate();
+            monthlyRevPay = Math.round(((revPay * (effectDay - 1)) + (revEffect.pay * (daysInMonth - effectDay + 1))) / daysInMonth);
+            revPay = revEffect.pay; revLevel = revEffect.level; revCellIndex = revEffect.cellIndex;
+            remarks.push(`Rev: ${revEffect.type}`);
+            if (revEffect.type === 'Promotion') {
+                isDoubleIncrementDue_rev = !revEffect.changeIncrement && revEffect.date.getMonth() + 1 !== incrementMonth;
+                if (revEffect.changeIncrement) incrementMonth = revEffect.date.getMonth() + 1;
+            }
+        }
+
+        const oldEffect = oldSpecialEffects.find(e => e.date.getFullYear() === currentDate.getFullYear() && e.date.getMonth() === currentDate.getMonth());
+        if (oldEffect) {
+            const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
+            const effectDay = oldEffect.date.getDate();
+            monthlyDrawnBasicPay = Math.round((((currentOldInitialPay + currentOldGradePay) * (effectDay - 1)) + ((oldEffect.pay + oldEffect.gradePay) * (daysInMonth - effectDay + 1))) / daysInMonth);
+            currentOldInitialPay = oldEffect.pay; currentOldGradePay = oldEffect.gradePay;
+            remarks.push(`Old: ${oldEffect.type}`);
+            if (oldEffect.type === 'Promotion') {
+                isDoubleIncrementDue_old = !oldEffect.changeIncrement && oldEffect.date.getMonth() + 1 !== oldIncrementMonth;
+                if (oldEffect.changeIncrement) oldIncrementMonth = oldEffect.date.getMonth() + 1;
+            }
+        }
+        
+        // --- UNIFIED PRORATION FOR LATE START AND EOL ---
+        const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
+        const nonPayableDates = new Set();
+
+        if (currentDate.getTime() === new Date(startDate.getFullYear(), startDate.getMonth(), 1).getTime() && startDate.getDate() > 1) {
+            for (let i = 1; i < startDate.getDate(); i++) {
+                nonPayableDates.add(i);
+            }
+        }
+        for (const period of eolPeriods) {
+            if (period.end < currentDate || period.start > new Date(currentDate.getFullYear(), currentDate.getMonth(), daysInMonth)) continue;
+            const overlapStart = new Date(Math.max(currentDate, period.start));
+            const overlapEnd = new Date(Math.min(new Date(currentDate.getFullYear(), currentDate.getMonth(), daysInMonth), period.end));
+            for (let d = overlapStart; d <= overlapEnd; d.setDate(d.getDate() + 1)) {
+                nonPayableDates.add(d.getDate());
+            }
+        }
+        
+        const payableDays = daysInMonth - nonPayableDates.size;
+        if (payableDays < daysInMonth) {
+            const prorationFactor = payableDays / daysInMonth;
+            // AMENDED: Round prorated pay
+            monthlyRevPay = Math.round(monthlyRevPay * prorationFactor);
+            monthlyDrawnBasicPay = Math.round(monthlyDrawnBasicPay * prorationFactor);
+            remarks.push(`Prorated (${payableDays}/${daysInMonth} days)`);
+        }
+
+        // --- CALCULATE FINAL VALUES FOR THE MONTH ---
+        const revDaRate = getDaRateForDate(currentDate, revisedDaRates);
+        const revDaAmount = Math.round(monthlyRevPay * revDaRate);
+        const revTotal = monthlyRevPay + revDaAmount;
+
+        const oldDaRate = getDaRateForDate(currentDate, oldDaRates);
+        let interimReliefAmount = 0;
+        if (currentDate >= new Date('2017-01-01T00:00:00')) {
+            interimReliefAmount = Math.round(monthlyDrawnBasicPay * 0.05);
+        }
+
+        const drawnDaAmount = Math.round((monthlyDrawnBasicPay + interimReliefAmount) * oldDaRate);
+        const drawnTotal = monthlyDrawnBasicPay + interimReliefAmount + drawnDaAmount;
+
+        results.push({
+            monthYear: currentDate.toLocaleString('en-GB', { month: 'short', year: 'numeric' }),
+            revLevel: revLevel, revCell: revCellIndex + 1, revBasicPay: monthlyRevPay,
+            revDaRate: revDaRate, revDa: revDaAmount, revTotal: revTotal,
+            drawnBasicPay: monthlyDrawnBasicPay, interimReliefAmount, oldDaRate,
+            drawnDa: drawnDaAmount, drawnTotal: drawnTotal,
+            diffBasic: monthlyRevPay - monthlyDrawnBasicPay,
+            diffDa: revDaAmount - drawnDaAmount,
+            diffTotal: revTotal - drawnTotal,
+            remarks: remarks.join(' / ') || '---'
+        });
+
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    // 3. DISPLAY RESULTS
+    displayResults(results, { empName, empCode, empPost, npsStatus, eolPeriods });
+}
+
+function displayResults(results, empDetails) {
+    const tbody = document.getElementById('resultsTbody');
+    tbody.innerHTML = '';
+    
+    let totalDiffBasic = 0, totalDiffDA = 0, totalDiffTotal = 0;
+    let totalArrears2016 = 0, totalArrears2017_2021 = 0;
+
+    results.forEach(row => {
+        totalDiffBasic += row.diffBasic;
+        totalDiffDA += row.diffDa;
+        totalDiffTotal += row.diffTotal;
+        
+        const year = parseInt(row.monthYear.split(' ')[1]);
+        if (year === 2016) {
+            totalArrears2016 += row.diffTotal;
+        } else if (year >= 2017 && year <= 2021) {
+            totalArrears2017_2021 += row.diffTotal;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.monthYear}</td>
+            <td style="text-align: center;">${row.revLevel}</td>
+            <td style="text-align: center;">${row.revCell}</td>
+            <td>${formatCurrency(row.revBasicPay)}</td>
+            <td style="text-align: center;">${(row.revDaRate * 100).toFixed(0)}%</td>
+            <td>${formatCurrency(row.revDa)}</td>
+            <td>${formatCurrency(row.revTotal)}</td>
+            <td>${formatCurrency(row.drawnBasicPay)}</td>
+            <td>${formatCurrency(row.interimReliefAmount)}</td>
+            <td style="text-align: center;">${(row.oldDaRate * 100).toFixed(0)}%</td>
+            <td>${formatCurrency(row.drawnDa)}</td>
+            <td>${formatCurrency(row.drawnTotal)}</td>
+            <td>${formatCurrency(row.diffBasic)}</td>
+            <td>${formatCurrency(row.diffDa)}</td>
+            <td>${formatCurrency(row.diffTotal)}</td>
+            <td>${row.remarks}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const totalRow = document.createElement('tr');
+    totalRow.style.fontWeight = 'bold';
+    totalRow.style.backgroundColor = '#dee2e6';
+    totalRow.innerHTML = `
+        <td colspan="12" style="text-align: center;">TOTAL DIFFERENCE PAYABLE</td>
+        <td>${formatCurrency(totalDiffBasic)}</td>
+        <td>${formatCurrency(totalDiffDA)}</td>
+        <td>${formatCurrency(totalDiffTotal)}</td>
+        <td></td>
+    `;
+    tbody.appendChild(totalRow);
+
+    if (empDetails.npsStatus === 'yes') {
+        const totalPayableDifference = Math.round(totalDiffTotal);
+        const cpfEmployerContribution = Math.round(totalPayableDifference * 0.10);
+        const netPayableArrears = totalPayableDifference - cpfEmployerContribution;
+
+        const createSummaryRow = (label, value, bgColor = '#f8f9fa') => {
+            const row = document.createElement('tr');
+            row.style.fontWeight = 'bold';
+            row.style.backgroundColor = bgColor;
+            row.innerHTML = `<td colspan="14" style="text-align: center;">${label}</td><td>${formatCurrency(value)}</td><td></td>`;
+            tbody.appendChild(row);
+        };
+        
+        createSummaryRow("CPF Employer's Contribution (10% of Total Difference)", cpfEmployerContribution);
+        createSummaryRow("Total Payable Arrears including CPF Employer's Contribution", totalPayableDifference + cpfEmployerContribution);
+        createSummaryRow("CPF Deductions (Employer and Employee) (20% of Total Difference)", cpfEmployerContribution * 2);
+        createSummaryRow("Net Payable Arrears", netPayableArrears, '#d4edda');
+    }
+    
+    let eolString = "";
+    if (empDetails.eolPeriods && empDetails.eolPeriods.length > 0) {
+        const formattedPeriods = empDetails.eolPeriods.map(p => 
+            `from ${p.start.toLocaleDateString('en-GB')} to ${p.end.toLocaleDateString('en-GB')}`
+        ).join('; ');
+        eolString = `<p><strong>EOL Period(s):</strong> ${formattedPeriods}</p>`;
+    }
+
+    document.getElementById('employeeDetailsOutput').innerHTML = `
+        <p><strong>Employee Name:</strong> ${empDetails.empName}</p>
+        <p><strong>Employee Code:</strong> ${empDetails.empCode}</p>
+        <p><strong>Present Post:</strong> ${empDetails.empPost}</p>
+        <p><strong>Under NPS:</strong> ${empDetails.npsStatus.charAt(0).toUpperCase() + empDetails.npsStatus.slice(1)}</p>
+        ${eolString}
+    `;
+
+    document.getElementById('print-page-header').innerHTML = `
+        <span>Employee: ${empDetails.empName}</span>
+        <span>Employee Code: ${empDetails.empCode}</span>
+    `;
+
+    // --- ARREAR INSTALMENT CALCULATION & DISPLAY ---
+    const summaryContainer = document.getElementById('instalmentSummaryContainer');
+    
+    const instalment2016 = totalArrears2016 / 12;
+    const instalment2017_2021 = totalArrears2017_2021 / 24;
+
+    let summaryHTML = '<h2>Arrear Instalment Summary</h2>';
+
+    // PART A
+    summaryHTML += `
+        <div class="instalment-part">
+            <h3>Part-A: Arrears for Year 2016</h3>
+            <table class="summary-table">
+                <tr><td>Total of payable arrears for year 2016</td><td>${formatCurrency(totalArrears2016)}</td></tr>
+                <tr><td>No. of equal Monthly Instalments</td><td>12</td></tr>
+                <tr><td>Period for payment</td><td>Instalment will Start from the month of April, 2026</td></tr>
+                <tr><td><b>Monthly instalment (Payable)</b></td><td><b>${formatCurrency(instalment2016)}</b></td></tr>
+            </table>
+    `;
+    if (empDetails.npsStatus === 'yes') {
+        const npsContribution2016 = instalment2016 * 0.10;
+        summaryHTML += `
+            <h4>NPS Details (for Part-A Instalment)</h4>
+            <table class="summary-table">
+                <tr><td>Monthly employer’s contribution (10%)</td><td>${formatCurrency(npsContribution2016)}</td></tr>
+                <tr><td>Monthly employee’s contribution (10%)</td><td>${formatCurrency(npsContribution2016)}</td></tr>
+                <tr class="net-payable-row"><td><b>Net Monthly Instalment (Credited to Bank)</b></td><td><b>${formatCurrency(instalment2016 - npsContribution2016)}</b></td></tr>
+            </table>
+        `;
+    }
+    summaryHTML += `</div>`;
+
+    // PART B
+    summaryHTML += `
+        <div class="instalment-part">
+            <h3>Part-B: Arrears for Years 2017 to 2021</h3>
+            <table class="summary-table">
+                <tr><td>Total of payable arrears for 2017 to 30.06.2021</td><td>${formatCurrency(totalArrears2017_2021)}</td></tr>
+                <tr><td>No. of equal Monthly Instalments</td><td>24</td></tr>
+                <tr><td>Period for payment</td><td>Instalment will Start from the month of April, 2027</td></tr>
+                <tr><td><b>Monthly instalment (Payable)</b></td><td><b>${formatCurrency(instalment2017_2021)}</b></td></tr>
+            </table>
+    `;
+    if (empDetails.npsStatus === 'yes') {
+        const npsContribution2017_2021 = instalment2017_2021 * 0.10;
+        summaryHTML += `
+            <h4>NPS Details (for Part-B Instalment)</h4>
+            <table class="summary-table">
+                 <tr><td>Monthly employer’s contribution (10%)</td><td>${formatCurrency(npsContribution2017_2021)}</td></tr>
+                <tr><td>Monthly employee’s contribution (10%)</td><td>${formatCurrency(npsContribution2017_2021)}</td></tr>
+                <tr class="net-payable-row"><td><b>Net Monthly Instalment (Credited to Bank)</b></td><td><b>${formatCurrency(instalment2017_2021 - npsContribution2017_2021)}</b></td></tr>
+            </table>
+        `;
+    }
+    summaryHTML += `</div>`;
+
+    summaryContainer.innerHTML = summaryHTML;
+
+
+    document.getElementById('resultsContainer').style.display = 'block';
+    document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+function generateAndDownloadCsv() {
+    // AMENDED: Get all employee details for CSV header
+    const empNameRaw = document.getElementById('empName').value;
+    const empCode = document.getElementById('empCode').value;
+    const empPost = document.getElementById('empPost').value;
+    const empNameForFile = empNameRaw.replace(/,/g, '');
+
+    const headers = [
+        'Month-Year',
+        'Rev Level', 'Rev Cell', 'Rev Basic', 'Rev DA %', 'Rev DA', 'Rev Total',
+        'Drawn Basic', 'Interim Relief', 'Drawn DA %', 'Drawn DA', 'Drawn Total',
+        'Diff Basic', 'Diff DA', 'Diff Total',
+        'Remarks'
+    ];
+    
+    // AMENDED: Start with employee details
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += `"Employee Name:","${empNameRaw.replace(/"/g, '""')}"\n`;
+    csvContent += `"Employee Code:","${empCode.replace(/"/g, '""')}"\n`;
+    csvContent += `"Designation:","${empPost.replace(/"/g, '""')}"\n\n`;
+
+    csvContent += headers.join(',') + '\n';
+    
+    // --- Main Calculation Table ---
+    const tableRows = document.querySelectorAll('#resultsTbody tr');
+    tableRows.forEach(row => {
+        let rowCells = [];
+        const cols = row.querySelectorAll('td');
+        
+        cols.forEach(col => {
+            let text = `"${col.innerText.replace(/"/g, '""').trim()}"`;
+            rowCells.push(text);
+            if (col.colSpan > 1) {
+                for (let i = 1; i < col.colSpan; i++) rowCells.push('""');
+            }
+        });
+        csvContent += rowCells.join(',') + '\n';
+    });
+
+    // --- Add Instalment Summary ---
+    csvContent += '\n\n'; // Add spacing
+
+    const summaryContainer = document.getElementById('instalmentSummaryContainer');
+    if (summaryContainer && summaryContainer.innerHTML) {
+        // Add a main title for the summary section
+        const mainTitle = summaryContainer.querySelector('h2');
+        if (mainTitle) {
+            csvContent += `"${mainTitle.innerText.trim()}"\n\n`;
+        }
+
+        // Process each instalment part (Part-A, Part-B)
+        const parts = summaryContainer.querySelectorAll('.instalment-part');
+        parts.forEach(part => {
+            const partTitle = part.querySelector('h3');
+            if (partTitle) {
+                csvContent += `"${partTitle.innerText.trim()}"\n`;
+            }
+
+            // Get all tables within this part (main details and NPS details)
+            const summaryTables = part.querySelectorAll('.summary-table');
+            summaryTables.forEach((table, index) => {
+                // If it's the second table, it's the NPS details, so add its title
+                if (index > 0) {
+                    const npsTitle = part.querySelector('h4');
+                    if (npsTitle) {
+                        csvContent += `"${npsTitle.innerText.trim()}"\n`;
+                    }
+                }
+
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let rowData = [];
+                    cells.forEach(cell => {
+                        // Sanitize cell text for CSV
+                        rowData.push(`"${cell.innerText.replace(/"/g, '""').trim()}"`);
+                    });
+                    csvContent += rowData.join(',') + '\n';
+                });
+                csvContent += '\n'; // Add a blank line after each table
+            });
+        });
+    }
+
+    // --- Create and trigger download link ---
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `pay_arrears_report_${empNameForFile}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+</script>
+
+</body>
+</html>
