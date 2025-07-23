@@ -1,0 +1,16 @@
+{
+  "name": "pspcl pay arrears",
+  "short_name": "pay arrear",
+  "start_url": "start.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "A short description of your awesome app.",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
